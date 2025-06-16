@@ -8,7 +8,7 @@ app = Flask(__name__)
 speed_logs = []
 log_lock = threading.Lock()
 
-DOWNLOAD_URL = "https://speedtest.tele2.net/10MB.zip"  # More reliable than Hetzner
+DOWNLOAD_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip"  # More reliable than Hetzner
 UPLOAD_URL = "https://httpbin.org/post"
 
 def download_speed_test():
