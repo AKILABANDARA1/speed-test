@@ -1,51 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Choreo Speed Test</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        #result { font-size: 18px; margin-top: 20px; }
-        #log { font-family: monospace; background: #f0f0f0; padding: 10px; white-space: pre-wrap; margin-top: 20px; border-left: 4px solid #ccc; }
-        button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
-    </style>
+    <title>Choreo Ingress/Egress Speed Monitor</title>
+    <script>
+        async function fetchLogs() {
+            const res = await fetch("/logs");
+            const data = await res.json();
+            const resultDiv = document.getElementById("results");
+            resultDiv.innerHTML = "";
+
+            if (data.length === 0) {
+                resultDiv.innerHTML = "<p>No logs yet.</p>";
+                return;
+            }
+
+            data.forEach(entry => {
+                const logEntry = document.createElement("div");
+                if (entry.error) {
+                    logEntry.innerHTML = `<strong>${entry.timestamp}</strong> ❌ Error: ${entry.error}`;
+                } else {
+                    logEntry.innerHTML = `<strong>${entry.timestamp}</strong> 📥 ${entry.download_mbps} Mbps | 📤 ${entry.upload_mbps} Mbps`;
+                }
+                resultDiv.appendChild(logEntry);
+            });
+        }
+
+        async function clearLogs() {
+            await fetch("/clear", { method: "POST" });
+            fetchLogs();
+        }
+
+        setInterval(fetchLogs, 5000);  // Refresh every 5s
+        window.onload = fetchLogs;
+    </script>
 </head>
 <body>
-    <h1>Choreo Ingress/Egress Speed Test</h1>
-    <div id="result">Click below to test speed.</div>
-    <button onclick="runSpeedTest()">Run Speed Test</button>
-    <div id="log"></div>
-
-    <script>
-        async function runSpeedTest() {
-            const resultDiv = document.getElementById("result");
-            const logDiv = document.getElementById("log");
-
-            resultDiv.textContent = "⏳ Running speed test...";
-            logDiv.textContent = "";
-
-            try {
-                const response = await fetch("/speedtest");
-                const data = await response.json();
-
-                if (data.error) {
-                    resultDiv.textContent = "❌ Error: " + data.error;
-                } else {
-                    resultDiv.innerHTML = `
-                        ✅ <strong>Download:</strong> ${data.download_mbps} Mbps<br>
-                        ✅ <strong>Upload:</strong> ${data.upload_mbps} Mbps
-                    `;
-                }
-
-                if (data.log) {
-                    logDiv.textContent = data.log.join("\n");
-                }
-
-            } catch (e) {
-                resultDiv.textContent = "❌ Error contacting the server.";
-                logDiv.textContent = e.toString();
-            }
-        }
-    </script>
+    <h1>📡 Choreo Ingress/Egress Speed Monitor</h1>
+    <button onclick="clearLogs()">🧹 Clear Logs</button>
+    <div id="results" style="margin-top: 20px;"></div>
 </body>
 </html>
