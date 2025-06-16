@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Choreo Ingress/Egress Speed Monitor</title>
+    <title>📡 Choreo Ingress/Egress Speed Monitor</title>
     <script>
         async function fetchLogs() {
             const res = await fetch("/logs");
@@ -30,7 +30,7 @@
             fetchLogs();
         }
 
-        setInterval(fetchLogs, 5000);  // Refresh every 5s
+        setInterval(fetchLogs, 5000);  // auto-refresh logs
         window.onload = fetchLogs;
     </script>
 </head>
