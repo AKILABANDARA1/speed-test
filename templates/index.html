@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
     <title>📡 Choreo Ingress/Egress Speed Monitor</title>
     <script>
         async function fetchLogs() {
@@ -15,13 +16,13 @@
             }
 
             data.forEach(entry => {
-                const logEntry = document.createElement("div");
+                const div = document.createElement("div");
                 if (entry.error) {
-                    logEntry.innerHTML = `<strong>${entry.timestamp}</strong> ❌ Error: ${entry.error}`;
+                    div.innerHTML = `<strong>${entry.timestamp}</strong> ❌ Error: ${entry.error}`;
                 } else {
-                    logEntry.innerHTML = `<strong>${entry.timestamp}</strong> 📥 ${entry.download_mbps} Mbps | 📤 ${entry.upload_mbps} Mbps`;
+                    div.innerHTML = `<strong>${entry.timestamp}</strong> 📥 Download: ${entry.download_mbps} Mbps | 📤 Upload: ${entry.upload_mbps} Mbps | 🏓 Ping: ${entry.ping_ms} ms`;
                 }
-                resultDiv.appendChild(logEntry);
+                resultDiv.appendChild(div);
             });
         }
 
@@ -30,13 +31,13 @@
             fetchLogs();
         }
 
-        setInterval(fetchLogs, 5000);  // auto-refresh logs
+        setInterval(fetchLogs, 5000);
         window.onload = fetchLogs;
     </script>
 </head>
 <body>
     <h1>📡 Choreo Ingress/Egress Speed Monitor</h1>
     <button onclick="clearLogs()">🧹 Clear Logs</button>
-    <div id="results" style="margin-top: 20px;"></div>
+    <div id="results" style="margin-top:20px; font-family: monospace;"></div>
 </body>
 </html>
