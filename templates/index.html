@@ -1,34 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Choreo Speed Test Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 60px;
-        }
-        .result {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-        button {
-            font-size: 16px;
-            padding: 10px 20px;
-            margin-top: 30px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Choreo Ingress/Egress Speed Test</h1>
-    <div class="result" id="result">Click below to test speed.</div>
-    <button onclick="runSpeedTest()">Run Speed Test</button>
-
+    <title>Choreo Speed Test</title>
     <script>
         async function runSpeedTest() {
             const resultDiv = document.getElementById("result");
-            resultDiv.textContent = "Running test... Please wait.";
+            resultDiv.textContent = "Running test...";
 
             try {
-                const respons
+                const res = await fetch("/speedtest");
+                const data = await res.json();
+
+                if (data.error) {
+                    resultDiv.textContent = "Error: " + data.error;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p>🚀 Download: <strong>${data.download_mbps}</strong> Mbps</p>
+                        <p>📤 Upload: <strong>${data.upload_mbps}</strong> Mbps</p>
+                    `;
+                }
+            } catch (err) {
+                resultDiv.textContent = "Error contacting server.";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Choreo Ingress/Egress Speed Test</h1>
+    <div id="result">Click below to test speed.</div>
+    <button onclick="runSpeedTest()">Run Speed Test</button>
+</body>
+</html>
