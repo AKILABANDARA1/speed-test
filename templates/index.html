@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>📡 Choreo Ingress/Egress Speed Monitor</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; }
-        button { margin-bottom: 20px; font-size: 1.2rem; }
-        .log-entry { font-family: monospace; padding: 6px 0; border-bottom: 1px solid #ddd; }
+        body { font-family: Arial; max-width: 900px; margin: 20px auto; }
+        .log-entry { font-family: monospace; margin: 5px 0; padding: 6px; border-bottom: 1px solid #ccc; }
         .error { color: red; }
     </style>
     <script>
@@ -22,15 +21,20 @@
             }
 
             data.forEach(entry => {
-                let html;
-                if (entry.download_error || entry.upload_error) {
-                    html = `<div class="log-entry error"><strong>${entry.timestamp}</strong><br/>` +
-                        (entry.download_error ? `📥 Download Error: ${entry.download_error}<br/>` : "") +
-                        (entry.upload_error ? `📤 Upload Error: ${entry.upload_error}` : "") +
-                        "</div>";
+                let html = `<div class="log-entry ${entry.download_error || entry.upload_error ? 'error' : ''}"><strong>${entry.timestamp}</strong><br/>`;
+                if (entry.download_error) {
+                    html += `📥 Download Error: ${entry.download_error}<br/>`;
                 } else {
-                    html = `<div class="log-entry"><strong>${entry.timestamp}</strong> | 📥 Download: ${entry.download_mbps} Mbps (${entry.download_duration_s}s) | 📤 Upload: ${entry.upload_mbps} Mbps (${entry.upload_duration_s}s)</div>`;
+                    html += `📥 Download: ${entry.download_mbps} Mbps (${entry.download_duration_s}s)<br/>`;
                 }
+
+                if (entry.upload_error) {
+                    html += `📤 Upload Error: ${entry.upload_error}`;
+                } else {
+                    html += `📤 Upload: ${entry.upload_mbps} Mbps (${entry.upload_duration_s}s)`;
+                }
+
+                html += "</div>";
                 resultDiv.insertAdjacentHTML("beforeend", html);
             });
         }
