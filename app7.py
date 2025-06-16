@@ -8,30 +8,29 @@ app = Flask(__name__)
 speed_logs = []
 log_lock = threading.Lock()
 
-DOWNLOAD_URL = "https://speed.hetzner.de/10MB.bin"
-UPLOAD_URL = "https://httpbin.org/post"  # public echo server for testing uploads
+DOWNLOAD_URL = "https://speedtest.tele2.net/10MB.zip"  # More reliable than Hetzner
+UPLOAD_URL = "https://httpbin.org/post"
 
 def download_speed_test():
     start = time.time()
     try:
-        r = requests.get(DOWNLOAD_URL, stream=True, timeout=30)
+        r = requests.get(DOWNLOAD_URL, stream=True, timeout=30, verify=True)
         total_bytes = 0
         for chunk in r.iter_content(chunk_size=1024*1024):
             total_bytes += len(chunk)
         duration = time.time() - start
-        mbps = (total_bytes * 8) / (duration * 1_000_000)  # Megabits per second
+        mbps = (total_bytes * 8) / (duration * 1_000_000)
         return round(mbps, 2), duration
     except Exception as e:
         return None, str(e)
 
 def upload_speed_test():
-    # Generate 5 MB of random bytes
     data = os.urandom(5 * 1024 * 1024)
     start = time.time()
     try:
         r = requests.post(UPLOAD_URL, data=data, timeout=30)
         duration = time.time() - start
-        mbps = (len(data) * 8) / (duration * 1_000_000)  # Megabits per second
+        mbps = (len(data) * 8) / (duration * 1_000_000)
         return round(mbps, 2), duration
     except Exception as e:
         return None, str(e)
@@ -56,7 +55,7 @@ def perform_speed_test():
 
     with log_lock:
         speed_logs.append(entry)
-    print(f"Logged speed test: {entry}")
+    print(f"Logged: {entry}")
 
 def schedule_speed_tests():
     while True:
