@@ -5,15 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install curl and librespeed-cli
-RUN apt-get update && apt-get install -y curl && \
-    curl -sL https://github.com/librespeed/speedtest-cli/releases/download/v1.0.11/librespeed-cli_1.0.11_linux_amd64.tar.gz \
-    | tar -xz -C /usr/local/bin && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
 COPY . .
 
-# Create non-root user for Choreo
 RUN groupadd -g 10001 appuser && useradd -u 10001 -g appuser -s /bin/sh -m appuser
 USER 10001
 
