@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <title>📡 Choreo Ingress/Egress Speed Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; }
+        button { margin-bottom: 20px; font-size: 1.2rem; }
+        .log-entry { font-family: monospace; padding: 6px 0; border-bottom: 1px solid #ddd; }
+        .error { color: red; }
+    </style>
     <script>
         async function fetchLogs() {
             const res = await fetch("/logs");
@@ -16,13 +22,16 @@
             }
 
             data.forEach(entry => {
-                const div = document.createElement("div");
-                if (entry.error) {
-                    div.innerHTML = `<strong>${entry.timestamp}</strong> ❌ Error: ${entry.error}`;
+                let html;
+                if (entry.download_error || entry.upload_error) {
+                    html = `<div class="log-entry error"><strong>${entry.timestamp}</strong><br/>` +
+                        (entry.download_error ? `📥 Download Error: ${entry.download_error}<br/>` : "") +
+                        (entry.upload_error ? `📤 Upload Error: ${entry.upload_error}` : "") +
+                        "</div>";
                 } else {
-                    div.innerHTML = `<strong>${entry.timestamp}</strong> 📥 Download: ${entry.download_mbps} Mbps | 📤 Upload: ${entry.upload_mbps} Mbps | 🏓 Ping: ${entry.ping_ms} ms`;
+                    html = `<div class="log-entry"><strong>${entry.timestamp}</strong> | 📥 Download: ${entry.download_mbps} Mbps (${entry.download_duration_s}s) | 📤 Upload: ${entry.upload_mbps} Mbps (${entry.upload_duration_s}s)</div>`;
                 }
-                resultDiv.appendChild(div);
+                resultDiv.insertAdjacentHTML("beforeend", html);
             });
         }
 
@@ -38,6 +47,6 @@
 <body>
     <h1>📡 Choreo Ingress/Egress Speed Monitor</h1>
     <button onclick="clearLogs()">🧹 Clear Logs</button>
-    <div id="results" style="margin-top:20px; font-family: monospace;"></div>
+    <div id="results"></div>
 </body>
 </html>
