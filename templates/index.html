@@ -1,33 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Choreo Speed Test</title>
-    <script>
-        async function runSpeedTest() {
-            const resultDiv = document.getElementById("result");
-            resultDiv.textContent = "Running test...";
-
-            try {
-                const res = await fetch("/speedtest");
-                const data = await res.json();
-
-                if (data.error) {
-                    resultDiv.textContent = "Error: " + data.error;
-                } else {
-                    resultDiv.innerHTML = `
-                        <p>🚀 Download: <strong>${data.download_mbps}</strong> Mbps</p>
-                        <p>📤 Upload: <strong>${data.upload_mbps}</strong> Mbps</p>
-                    `;
-                }
-            } catch (err) {
-                resultDiv.textContent = "Error contacting server.";
-            }
-        }
-    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        #result { font-size: 18px; margin-top: 20px; }
+        #log { font-family: monospace; background: #f0f0f0; padding: 10px; white-space: pre-wrap; margin-top: 20px; border-left: 4px solid #ccc; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
+    </style>
 </head>
 <body>
     <h1>Choreo Ingress/Egress Speed Test</h1>
     <div id="result">Click below to test speed.</div>
     <button onclick="runSpeedTest()">Run Speed Test</button>
+    <div id="log"></div>
+
+    <script>
+        async function runSpeedTest() {
+            const resultDiv = document.getElementById("result");
+            const logDiv = document.getElementById("log");
+
+            resultDiv.textContent = "⏳ Running speed test...";
+            logDiv.textContent = "";
+
+            try {
+                const response = await fetch("/speedtest");
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.textContent = "❌ Error: " + data.error;
+                } else {
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Download:</strong> ${data.download_mbps} Mbps<br>
+                        ✅ <strong>Upload:</strong> ${data.upload_mbps} Mbps
+                    `;
+                }
+
+                if (data.log) {
+                    logDiv.textContent = data.log.join("\n");
+                }
+
+            } catch (e) {
+                resultDiv.textContent = "❌ Error contacting the server.";
+                logDiv.textContent = e.toString();
+            }
+        }
+    </script>
 </body>
 </html>
