@@ -12,13 +12,19 @@ log_lock = threading.Lock()
 def perform_speed_test():
     try:
         print("⚡ Running speed test")
-        output = subprocess.check_output(["librespeed-cli", "--json"], timeout=60)
+        output = subprocess.check_output(["librespeed-cli", "--json"], timeout=90)
         data = json.loads(output)
+        
+        if isinstance(data, list) and len(data) > 0:
+            last_result = data[-1]
+        else:
+            last_result = data
+        
         entry = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "download_mbps": round(data["download"] / 1_000_000, 2),
-            "upload_mbps": round(data["upload"] / 1_000_000, 2),
-            "ping_ms": data.get("ping")
+            "download_mbps": round(last_result["download"] / 1_000_000, 2),
+            "upload_mbps": round(last_result["upload"] / 1_000_000, 2),
+            "ping_ms": last_result.get("ping")
         }
         print(f"✅ Speed test result: {entry}")
     except Exception as e:
