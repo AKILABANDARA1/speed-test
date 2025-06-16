@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template
-import speedtest
-import traceback
+import requests
+import time
 
 app = Flask(__name__)
 
@@ -12,36 +12,38 @@ def index():
 def run_speed_test():
     log = []
     try:
-        log.append("📡 Initializing speedtest...")
-        st = speedtest.Speedtest()
+        log.append("🚀 Starting LibreSpeed test...")
 
-        log.append("🌐 Finding best server...")
-        best = st.get_best_server()
-        log.append(f"✅ Best server: {best['host']} ({best['name']}, {best['country']})")
+        # Download test (dummy data)
+        start = time.time()
+        res = requests.get("https://librespeed.org/files/10MB.bin", stream=True, timeout=20)
+        size_bytes = 0
+        for chunk in res.iter_content(chunk_size=1024*1024):
+            size_bytes += len(chunk)
+        download_time = time.time() - start
+        download_mbps = (size_bytes * 8) / (download_time * 1_000_000)
+        log.append(f"📥 Download: {round(download_mbps, 2)} Mbps")
 
-        log.append("📥 Measuring download speed...")
-        download = st.download() / 1_000_000  # Mbps
-        log.append(f"📥 Download: {round(download, 2)} Mbps")
+        # Upload test — simulate 5MB upload
+        start = time.time()
+        payload = b"x" * (5 * 1024 * 1024)  # 5MB
+        upload_res = requests.post(
+            "https://librespeed.org/backend.php",
+            files={"file": ("dummy.dat", payload)},
+            timeout=20
+        )
+        upload_time = time.time() - start
+        upload_mbps = (len(payload) * 8) / (upload_time * 1_000_000)
+        log.append(f"📤 Upload: {round(upload_mbps, 2)} Mbps")
 
-        log.append("📤 Measuring upload speed...")
-        upload = st.upload() / 1_000_000
-        log.append(f"📤 Upload: {round(upload, 2)} Mbps")
-
-        result = {
-            "download_mbps": round(download, 2),
-            "upload_mbps": round(upload, 2),
+        return jsonify({
+            "download_mbps": round(download_mbps, 2),
+            "upload_mbps": round(upload_mbps, 2),
             "log": log
-        }
-
-        print("Speedtest completed:", result)  # Log to server console
-        return jsonify(result)
+        })
 
     except Exception as e:
-        error_trace = traceback.format_exc()
-        log.append("❌ Error occurred:")
-        log.append(str(e))
-        log.append(error_trace)
-        print("Speedtest failed:", error_trace)  # Log to server console
+        log.append(f"❌ Error: {str(e)}")
         return jsonify({"error": str(e), "log": log}), 500
 
 if __name__ == "__main__":
