@@ -25,13 +25,13 @@ def download_speed_test():
         return None, str(e)
 
 def upload_speed_test():
-    data = os.urandom(5 * 1024 * 1024)
-    start = time.time()
+    data = os.urandom(2 * 1024 * 1024)  # Reduced to 2 MB
+    start = time.perf_counter()  # High precision timer
     try:
-        r = requests.post(UPLOAD_URL, data=data, timeout=30)
-        duration = time.time() - start
+        r = requests.post(UPLOAD_URL, data=data, timeout=120)
+        duration = time.perf_counter() - start
         mbps = (len(data) * 8) / (duration * 1_000_000)
-        return round(mbps, 2), duration
+        return round(mbps, 3), duration
     except Exception as e:
         return None, str(e)
 
